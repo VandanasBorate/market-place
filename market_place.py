@@ -102,10 +102,10 @@ def handle_upload():
     if isinstance(inprox_usage, int) and isinstance(inprox02_usage, int):
        
         if inprox_usage < 50:
-            result = upload_file_to_proxmox(local_file_path, remote_file_path, hostname_inprox, 22, username, private_key_path, "inprox")
+            result = upload_file_to_proxmox(local_file_path, remote_file_path, hostname_inprox, 22, username, private_key_path, "innprox")
         
         elif inprox02_usage < 95:
-            result = upload_file_to_proxmox(local_file_path, remote_file_path, hostname_inprox02, 22, username, private_key_path, "inprox-02")
+            result = upload_file_to_proxmox(local_file_path, remote_file_path, hostname_inprox02, 22, username, private_key_path, "innprox-02")
         else:
             # If both storages are full, return an error
             result = { 'message': "Both storage locations are over 95% full. Cannot upload file."}
