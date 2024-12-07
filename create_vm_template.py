@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import requests
 import urllib3
+import create_vm_template
 
 # Disable SSL warnings for testing purposes. This prevents warnings when using self-signed SSL certificates.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

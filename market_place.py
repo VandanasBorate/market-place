@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import paramiko
 from paramiko import RSAKey
 import os
+import create_vm_template
 
 app = Flask(__name__)
 
@@ -87,7 +88,9 @@ def handle_upload():
     if file_name.endswith('.iso') or file_name.endswith('.img'):
         remote_file_path = f"/var/lib/vz/template/iso/{file_name}"  # For ISO and IMG files
     else:
-        remote_file_path = f"/var/lib/vz/images/{file_name}"  # For other file types
+        # remote_file_path = f"/var/lib/vz/images/{file_name}"  # For other file types
+        create_vm_template.get_available_vmid(file_name)  # Call the function
+         
     
     # Set Proxmox connection details
     hostname_inprox = '192.168.1.107'  # Proxmox node 1 IP (inprox)
