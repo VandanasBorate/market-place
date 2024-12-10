@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -152,8 +150,9 @@
                 ];
             } else if (currentCategory === 'template') {
                 data = [
-                    { name: 'Jammy_server', file: '169', img: '/static/images/jammy.png' },
-                    { name: 'mysql', file: 'sql.qcow2', img: '/static/images/development+logo+mysql+icon-1320184807686758112.png' }
+                    { name: 'Jammy_server', file: '140', img: '/static/images/jammy.png' },
+                    { name: 'mysql', file: 'base-140-disk-0.raw', img: '/static/images/development+logo+mysql+icon-1320184807686758112.png' },
+                    { name: 'ubuntu', file: '166', img: '/static/images/ubuntu.png' }
                 ];
             } else if (currentCategory === 'lxc') {
                 data = [
@@ -182,25 +181,31 @@
         }
 
         function uploadFileToProxmox(file) {
-            fetch('/upload_file', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ file: file })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert(data.message);
-                } else {
-                    alert('Error uploading file: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred during the file upload.');
-            });
+            if (file.endsWith('.iso') || file.endsWith('.img')) {
+                // If file is .iso or .img, upload the file
+                fetch('/upload_file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ file: file })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                    } else {
+                        alert('uploading file: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An issues occurred during the file upload.');
+                });
+            } else {
+                // If the file is not .iso or .img, redirect to the 'create_vm.html' page with the file name as a query parameter
+                window.location.href = `/create_vm?file_name=${file}`;
+            }
         }
 
         updateContent();

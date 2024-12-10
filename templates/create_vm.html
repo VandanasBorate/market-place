@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create VM on Proxmox</title>
     <style>
-        /* General page styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f4f8;
@@ -18,7 +17,6 @@
             height: 100vh;
         }
 
-        /* Styling for the form container */
         form {
             background-color: #ffffff;
             padding: 20px;
@@ -38,8 +36,8 @@
             display: block;
         }
 
-        input[type="number"],
-        input[type="text"] {
+        input[type="text"],
+        input[type="number"] {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
@@ -64,14 +62,6 @@
             background-color: #0056b3;
         }
 
-        /* Styling for responsiveness */
-        @media (max-width: 600px) {
-            form {
-                width: 90%;
-            }
-        }
-
-        /* Styling for message display */
         .message {
             padding: 10px;
             margin: 15px 0;
@@ -91,35 +81,18 @@
         }
     </style>
 </head>
-
 <body>
-    <form method="POST" action="{{ url_for('create_vm') }}">
+    <form method="post">
         <h2>Create a New Virtual Machine</h2>
         
-        <!-- VMID is auto-generated -->
-
-
-        <!-- <label for="vmid">Username:</label>
-        <input type="text" id="username" name="username" required><br>
-
-        <label for="name">Password:</label>
-        <input type="text" id="password" name="password" required> -->
-
         <label for="vmid">VM ID (Auto-generated):</label>
         <input type="text" id="vmid" name="vmid" value="{{ vmid }}" readonly><br>
+         
+        <label for="file_name">Clone Template:</label>
+        <input type="text" id="file_name" name="file_name" value="{{ file_name }}" readonly><br>
 
         <label for="name">VM Name:</label>
-        <input type="text" id="name" name="name" required>
-
-         <!-- <label for="memory">Memory (in MB):</label>
-        <input type="number" id="memory" name="memory" required>
-
-        <label for="storage_size">Storage Size (in GB): </label>
-        <input type="text" id="storage_size" name="storage_size" required><br>
-
-        <label for="cores">CPU Cores:</label>
-        <input type="number" id="cores" name="cores" required>   
-        -->
+        <input type="text" id="name" name="name" required><br>
 
         <input type="submit" value="Create VM">
     </form>
