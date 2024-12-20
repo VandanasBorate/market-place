@@ -105,13 +105,13 @@ def handle_upload():
         return jsonify(result)
 
 
-node_name = 'innprox'
+node_name = 'innprox-02'
 
 # Define the route for creating a VM
 @app.route('/create_vm', methods=['GET', 'POST'])
 def create_vm():
     # Define the get_available_vmid function
-    PROXMOX_URL = "https://192.168.1.107:8006/api2/json"
+    PROXMOX_URL = "https://192.168.1.252:8006/api2/json"
     TOKEN_ID = "pythonapi@pam!apipython"
     TOKEN_SECRET = "8b13892c-c6e9-43c0-b128-3f17dd0f932a"
     headers = {
@@ -157,7 +157,7 @@ def create_vm():
             "newid": vmid,  # The ID for the new VM
             "name": name,  # The name for the new VM
             "full": 1,  # Perform a full clone
-            "storage": "local",  # Storage where the cloned disk will be created (adjust to your setup)
+            "storage": "storage1",  # Storage where the cloned disk will be created (adjust to your setup)
         }
 
         url = f"{PROXMOX_URL}/nodes/{node_name}/qemu/{file_name}/clone"
@@ -198,3 +198,126 @@ if __name__ == '__main__':
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# @app.route('/create_vm', methods=['GET', 'POST'])
+# def create_vm():
+#     # Define the Proxmox API details
+#     PROXMOX_URL = "https://192.168.1.252:8006/api2/json"
+#     TOKEN_ID = "pythonapi@pam!apipython"
+#     TOKEN_SECRET = "8b13892c-c6e9-43c0-b128-3f17dd0f932a"
+#     headers = {
+#         'Authorization': f'PVEAPIToken={TOKEN_ID}={TOKEN_SECRET}',
+#         'Content-Type': 'application/json'
+#     }
+
+#     # Define the get_available_vmid function
+#     def get_available_vmid(node):
+#         url = f"{PROXMOX_URL}/nodes/{node}/qemu"
+#         try:
+#             response = requests.get(url, headers=headers, verify=False)
+#             if response.status_code == 200:
+#                 existing_vms = response.json()['data']
+#                 existing_vmids = [vm['vmid'] for vm in existing_vms]
+#                 vmid = 200
+#                 while vmid in existing_vmids:
+#                     vmid += 1
+#                 return vmid
+#             else:
+#                 raise Exception("Failed to fetch existing VMs.")
+#         except requests.RequestException as e:
+#             raise Exception(f"Error fetching VM list from Proxmox: {str(e)}")
+
+#     vmid = None  # Initialize vmid here
+
+#     # Get the file_name parameter from the query string
+#     file_name = request.args.get('file_name')  # Fetch the file name from the URL
+
+#     if request.method == 'POST':
+#         # Handle POST request for creating a VM
+#         name = request.form['name']  # VM name
+#         node = "innprox-02"  # Select Proxmox node where VM should be created
+
+#         # Get an available VMID
+#         vmid = get_available_vmid(node)
+#         print(vmid)  # Get available VMID
+
+#         # if not file_name:
+#         #     return jsonify({"error": "file_name parameter is required!"})
+
+#         # Create the clone payload with dynamic vmid
+#         clone_payload = {
+#             "newid": vmid,  # The ID for the new VM
+#             "name": name,  # The name for the new VM
+#             "full": 1,  # Perform a full clone
+#             "storage": "storage1",  # Storage where the cloned disk will be created (adjust to your setup)
+#         }
+
+#         url = f"{PROXMOX_URL}/nodes/{node}/qemu/{file_name}/clone"
+#         print(url)
+
+#         try:
+#             response = requests.post(url, headers=headers, json=clone_payload, verify=False)
+
+#             if response.status_code in [200, 202]:
+#                 message = "VM creation initiated successfully from the template!"  
+#             else:
+#                 message = f"Failed to clone VM: {response.text}"
+
+#         except requests.RequestException as e:
+#             message = f"Network issues: {str(e)}"
+
+#         return render_template('create_vm.html', message=message, vmid=vmid)
+
+#     # If GET request, get an available VMID and render the form
+#     if not vmid:
+#         node = "innprox-02"  # Same Proxmox node where VM should be created
+#         vmid = get_available_vmid(node)  # Fetch VMID for GET requests
+
+#     return render_template('create_vm.html', vmid=vmid, file_name=file_name)
+ # Start the Flask application in debug mode
