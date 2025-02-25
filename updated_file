@@ -1,0 +1,176 @@
+from flask import Flask, request, jsonify, render_template
+import paramiko
+from paramiko import RSAKey
+import datetime
+import re
+
+app = Flask(__name__)
+
+# Function to get the current timestamp
+def get_timestamp():
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+def clean_step(step):
+    # Remove unwanted characters like escape sequences (e.g., color codes)
+    unwanted_patterns = r'[\x1b|\x1B]\[[0-9;]*[a-zA-Z]'  # Regex for escape sequences
+    progress_indicators = r'[\?✔️✖️⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]'  # Symbols to remove
+    
+    # Remove unwanted patterns (color codes, escape sequences)
+    step = re.sub(unwanted_patterns, '', step)
+
+    
+    
+    # Remove progress indicators
+    cleaned_step = re.sub(progress_indicators, '', step)
+
+    # If the cleaned step is empty after removing, return None or a blank string
+    return cleaned_step.strip() if cleaned_step.strip() else None  # Clean leading/trailing spaces after cleaning
+
+
+@app.route('/')
+def home():
+    return render_template('marketplace.html') 
+
+@app.route('/create_lxc', methods=['GET', 'POST'])
+def lxc_container(): 
+    logs = []  # List to store logs with timestamps
+
+    if request.method == 'GET':
+        try:
+           
+            file_name = request.args.get('file_name')
+            
+            # Define your Proxmox node details for SSH connection
+            hostname = '192.168.1.252'  # Proxmox node IP
+            username = 'root'  # Proxmox username
+            private_key_path = '/home/innuser002/.ssh/id_rsa'  # Path to your private SSH key
+            port = 22
+
+        
+            # Create an SSH client instance
+            ssh_client = paramiko.SSHClient()
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            
+            private_key = RSAKey.from_private_key_file(private_key_path)
+
+            
+            ssh_client.connect(hostname, port=port, username=username, pkey=private_key)
+            
+            
+            stdin, stdout, stderr = ssh_client.exec_command('pvesh get /cluster/nextid')
+
+            # Capture output and errors
+            result = stdout.read().decode().strip()
+            error = stderr.read().decode()
+        
+            if result:
+                
+                return render_template('create_lxc.html', ct_id=result, file_name=file_name, logs=logs)
+
+            if error:
+                
+                return f"Error occurred: {error}"
+        
+        except Exception as e:
+            
+            return f"Error connecting to Proxmox: {str(e)}"
+        
+        finally:
+            ssh_client.close()
+           
+
+    elif request.method == 'POST':
+       
+
+        vmid = request.form.get('vmid') 
+        file = request.form.get('file_name')  # LXC ID (Auto-generated)
+        name = request.form.get('name')  # LXC Name
+        password = request.form.get('pass')  # LXC Password
+        ssh_key = '"' + str(request.form.get('ssh', '')) + '"'
+
+      
+        # Check if all form fields are filled
+        if not vmid or not name or not password or not ssh_key:
+            return render_template('create_lxc.html', error="All fields must be filled out!", logs=logs)
+
+        try:
+            # Define Proxmox node details for SSH connection
+            hostname = '192.168.1.252'  # Proxmox node IP
+            username = 'root'  # Proxmox username
+            private_key_path = '/home/innuser002/.ssh/id_rsa'  # Path to your private SSH key
+            port = 22
+
+            
+            # Create an SSH client instance
+            ssh_client = paramiko.SSHClient()
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+           
+            private_key = RSAKey.from_private_key_file(private_key_path)
+
+            # Connect to Proxmox node
+            
+            ssh_client.connect(hostname, port=port, username=username, pkey=private_key)
+
+            command = f'/bin/bash {file} {vmid} {name} {password} {ssh_key}'
+            print(command)
+
+
+            # Execute the command
+            stdin, stdout, stderr = ssh_client.exec_command(command)
+
+            # Capture the output and errors
+            result = stdout.read().decode().strip()
+            error = stderr.read().decode().strip()
+
+            if error:
+               
+                return render_template('create_lxc.html', error=f"Error occurred: {error}", logs=logs)
+
+            if result:
+                # Split result into individual lines (each line represents a step)
+                result_steps = result.splitlines()  # Split the result by lines
+                for step in result_steps:
+                    # Clean and log each step with the timestamp
+                    cleaned_step = clean_step(step)
+                    if cleaned_step:  # Only log if the step is not empty after cleaning
+                        logs.append(f"{get_timestamp()} - {cleaned_step}")
+
+                # Command to fetch the IPv4 address of eth0 (exclude IPv6)
+                ip_command = f"pct exec {vmid} -- ip -4 a show eth0 | grep inet | awk '{{print $2}}' | cut -d'/' -f1"
+
+                # Command to fetch the full MAC address (no truncation)
+                mac_command = f"pct exec {vmid} -- ip link show eth0 | grep link/ether | awk '{{print $2}}'"
+
+                # Execute the command for IP address
+                stdin, stdout, stderr = ssh_client.exec_command(ip_command)
+                ip_result = stdout.read().decode().strip()
+
+                # Execute the command for MAC address
+                stdin, stdout, stderr = ssh_client.exec_command(mac_command)
+                mac_result = stdout.read().decode().strip()
+
+                # Handle the case where results might be empty or not found
+                ip_address = ip_result if ip_result else "N/A"
+                mac_address = mac_result if mac_result else "N/A"
+
+                logs.append(f"{get_timestamp()} - IP Address: {ip_address}")
+                logs.append(f"{get_timestamp()} - MAC Address: {mac_address}")
+
+                return render_template('create_lxc.html', success_message="LXC Container created successfully!",
+                                      ip_address=ip_address, mac_address=mac_address, logs=logs)
+
+        except Exception as e:
+            
+            return render_template('create_lxc.html', error=f"Error connecting to Proxmox: {str(e)}", logs=logs)
+
+        finally:
+            # Ensure the SSH client is closed to release resources
+            ssh_client.close()
+        
+
+    return render_template('create_lxc.html', logs=logs)
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
