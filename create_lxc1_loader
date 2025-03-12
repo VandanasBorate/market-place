@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <title>Create LXC Container on Proxmox</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        /* Label styling */
+        label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+        display: block;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            color: #007bff;
+            font-size: 1.8em;
+            margin-bottom: 50px;
+        }
+
+        .btn-primary {
+            background-color: #135cfa;
+            color: #fff;
+            padding: 6px 12px;
+            width: 50%;
+            height: 40px;
+            border-radius: 4px;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0;
+        }
+
+        .btn-primary:hover {
+            background-color: #0e4db5;
+        }
+
+        .home-icon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: #135cfa;
+            cursor: pointer;
+        }
+
+        /* Loader Styling */
+        #loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader {
+          width: 50px;
+          --b: 8px;
+          aspect-ratio: 1;
+          border-radius: 50%;
+          background: #135cfa;
+          -webkit-mask:
+            repeating-conic-gradient(#0000 0deg,#000 1deg 70deg,#0000 71deg 90deg),
+          radial-gradient(farthest-side,#0000 calc(100% - var(--b) - 1px),#000 calc(100% - var(--b)));
+        -webkit-mask-composite: destination-in;
+        mask-composite: intersect;
+        animation: l5 1s infinite;
+        }
+        @keyframes l5 {to{transform: rotate(.5turn)}}
+
+    </style>
+
+    <script>
+        function checkPasswordMatch() {
+            var pass1 = document.getElementById('pass1').value;
+            var pass2 = document.getElementById('pass2').value;
+            var message = document.getElementById('passwordMatchMessage');
+
+            if (pass1 !== pass2) {
+                message.style.color = 'red';
+                message.textContent = 'Passwords do not match';
+                document.getElementById('pass2').setCustomValidity('Passwords do not match');
+            } else {
+                message.style.color = 'green';
+                message.textContent = 'Passwords match';
+                document.getElementById('pass2').setCustomValidity('');
+            }
+        }
+
+        function validatePasswords() {
+            var pass1 = document.getElementById('pass1').value;
+            var pass2 = document.getElementById('pass2').value;
+
+            if (pass1 !== pass2) {
+                alert("Passwords do not match!");
+                return false;
+            }
+            return true;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var form = document.getElementById("lxc-form");
+            var loader = document.getElementById("loader");
+            var container = document.getElementById("main-content");
+
+            form.addEventListener("submit", function () {
+                if (form.checkValidity() && validatePasswords()) {
+                    // Hide form and show loader
+                    container.style.display = "none";
+                    loader.style.display = "flex";
+                }
+            });
+        });
+    </script>
+
+</head>
+<body>
+
+    <div id="main-content" class="container mt-5">
+        <div class="home-icon">
+            <a href="/">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+
+        <form id="lxc-form" method="POST" action="/create_lxc" class="needs-validation" novalidate>
+            <h2>Create a New LXC Container</h2>
+
+            <div class="form-group">
+                <label for="vmid">LXC ID (Auto-generated):</label>
+                <input type="text" id="vmid" name="vmid" value="{{ ct_id }}" class="form-control" readonly>
+            </div>
+
+            <div class="form-group" hidden>
+                <label for="file_name">LXC file_name:</label>
+                <input type="text" id="file_name" name="file_name" value="{{ file_name }}" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="name">LXC Name:</label>
+                <input type="text" id="name" name="name" class="form-control" required>
+                <div class="invalid-feedback">Please enter a valid LXC name.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="pass1">LXC Password:</label>
+                <input type="password" id="pass1" name="pass" class="form-control" minlength="5" required>
+                <div class="invalid-feedback">Please enter a password (minimum 5 characters).</div>
+            </div>
+
+            <div class="form-group">
+                <label for="pass2">Retype LXC Password:</label>
+                <input type="password" id="pass2" name="pass" class="form-control" minlength="5" onkeyup="checkPasswordMatch()" required>
+                <div class="invalid-feedback">Passwords do not match.</div>
+                <small id="passwordMatchMessage"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="ssh">LXC SSH Key (Optional):</label>
+                <input type="text" id="ssh" name="ssh" class="form-control">
+                <div class="invalid-feedback">Please enter a valid SSH key.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create LXC Container</button>
+        </form>
+    </div>
+
+    <!-- Full-Screen Loader -->
+    <div id="loader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>
