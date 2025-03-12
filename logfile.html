@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplaces</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    
+  
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+   body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #222;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    color: #ddd;
+    overflow: hidden; /* Prevents overflowing content from extending outside */
+    margin-top: 100px;
+}
+
+h4 {
+    font-size: 24px;
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Table for Configuration Details */
+.config-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.config-table th, .config-table td {
+    padding: 12px;
+    border: 1px solid #444;
+    text-align: left;
+    color: #ddd;
+    word-wrap: break-word; /* Ensures long text wraps properly */
+    overflow-wrap: break-word; /* New for better handling of long content */
+    max-width: 100%; /* Ensures cells do not overflow */
+    box-sizing: border-box; /* Prevents overflow by considering padding */
+}
+
+.config-table th {
+    background-color: #333;
+    color: white;
+    white-space: nowrap; /* Prevent text from breaking down to the next line */
+}
+
+.config-table td {
+    background-color: #222;
+}
+
+/* Log file table */
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    display: none; /* Hidden by default */
+}
+
+.log-table th, .log-table td {
+    padding: 12px;
+    border: 1px solid #444;
+    text-align: left;
+    color: #ddd;
+    word-wrap: break-word; /* Ensures long text wraps properly */
+    overflow-wrap: break-word; /* New for better handling of long content */
+}
+
+.log-table th {
+    background-color: #333;
+    color: white;
+    white-space: nowrap; /* Prevent text from breaking down to the next line */
+}
+
+.log-table td {
+    background-color: #222;
+}
+
+.log-table.visible {
+    display: table;
+}
+
+/* Apply font style to log file link */
+#log-file {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    width: 200px;
+    margin: 60px auto;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+#log-file:hover {
+    background-color: #444;
+}
+.home-icon {
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            font-size: 24px;
+            color: #135cfa;
+            cursor: pointer;
+            
+        }
+
+    </style>
+</head>
+<body>
+    <div class="home-icon">
+      <a href="/">
+        <i class="fas fa-home"></i>
+      </a>
+    </div>
+    <div class="container">
+        <h4>Configuration File</h4>
+
+        <!-- Table for Configuration Details -->
+        <table class="config-table">
+            <tr>
+                <th>Hostname</th>
+                <td>{{ name }}</td>
+            </tr>
+            <tr>
+                <th>LXC ID</th>
+                <td>{{ vmid }}</td>
+            </tr>
+            <tr>
+                <th>Operating System</th>
+                <td>Debian</td>
+            </tr>
+            <tr>
+                <th>OS Version</th>
+                <td>12</td>
+            </tr>
+            <tr>
+                <th>CPU Cores</th>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>RAM Size</th>
+                <td>1024 MiB</td>
+            </tr>
+            <tr>
+                <th>Disk Size</th>
+                <td>4 GB</td>
+            </tr>
+            <tr>
+                <th>Container Type</th>
+                <td>Unprivileged</td>
+            </tr>
+           
+            <tr>
+                <th>Current Status</th>
+                <td>Start</td>
+            </tr>
+           
+            <tr>
+                <th>IP Address</th>
+                <td>{{ ip_address }}</td>
+            </tr>
+            <tr>
+                <th>MAC Address</th>
+                <td>{{ mac_address }}</td>
+            </tr>
+        </table>
+
+        <!-- Logs File Section -->
+        <br><a id="log-file">Logs File: (Click to view)</a>
+        <table class="log-table" id="log-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.split(' - ')[0] }}</td>
+                        <td>{{ log.split(' - ')[1] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Toggle visibility of log table when "Logs File" is clicked
+        document.getElementById('log-file').addEventListener('click', function() {
+            const logTable = document.getElementById('log-table');
+            logTable.classList.toggle('visible');
+        });
+    </script>
+
+</body>
+</html>
