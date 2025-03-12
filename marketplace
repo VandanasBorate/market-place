@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplaces</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="active" onclick="showCategory('iso')">ISO</a>
+        <a href="#" onclick="showCategory('template')">Templates</a>
+        <a href="#" onclick="showCategory('lxc')">LXC</a>
+    </nav>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="images/logo.png" alt="logo" />
+            <h2>Apps</h2>
+        </div>
+        <ul class="sidebar-links">
+            <li>
+                <a href="#" onclick="showCategoryFilter('database')"><span class="material-symbols-outlined"> database </span>Database</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('os')"><span class="material-symbols-outlined"> overview </span>Operating System</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('monitoring')"><span class="material-symbols-outlined">monitoring </span>Monitoring Tools</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('webserver')"><span class="material-symbols-outlined"> folder </span>Webservers</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('authentication')"><span class="material-symbols-outlined"> groups </span>Authentication<br>Security</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('transfer')"><span class="material-symbols-outlined"> move_up </span>Transfer</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('document')"><span class="material-symbols-outlined"> flag </span>Documents</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('dns')"><span class="material-symbols-outlined"> account_circle </span>Adblock & DNS</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('ui')"><span class="material-symbols-outlined"> settings </span>UI tools</a>
+            </li>
+            <li>
+                <a href="#" onclick="showCategoryFilter('media')"><span class="material-symbols-outlined"> logout </span>Media & <br>Streaming</a>
+            </li>
+        </ul>
+    </aside>
+
+    <div id="content" class="container"></div>
+
+    <script>
+        let currentCategory = 'iso'; // Default to 'iso'
+        let activeFilter = ''; // Track the active filter category
+       
+        // Data for each category
+        const data = {
+            iso: [
+            { name: 'MySQL', file: 'mysql.iso', img: '/static/images/development+logo+mysql+icon-1320184807686758112.png', type:'database' },
+            { name: 'MongoDB', file: 'mongo.iso', img: '/static/images/download.jpeg',type:'database'},
+            { name: 'Centos', file: 'ubunto.iso', img: '/static/images/centos.jpeg',type:'os'},
+            { name: 'GitLab', file: 'gitlab.iso', img: '/static/images/GitLab_icon.svg.png', type:'transfer'},
+            { name: 'MariaDB', file: '198', img: '/static/images/maria.jpeg',type:'database'},
+            // { name: 'MYSQL', file: '209', img: '/static/images/development+logo+mysql+icon-1320184807686758112.png' },
+            { name: 'ubuntu 24.04', file: '166', img: '/static/images/ubuntu.png', type:'os' },
+            { name: 'jammy server', file: '169', img: '/static/images/Ubuntu2204LTS1.png',type:'os' },
+            // { name: 'MYSQL', file: 'mysql.sh', img: '/static/images/development+logo+mysql+icon-1320184807686758112.png' },
+            { name: 'Postgres-SQL', file: 'Postgres.sh', img: '/static/images/post.jpeg', type:'database' },
+            // { name: 'prometheus', file: '238', img: '/static/images/prometheus1.jpeg' },
+            // { name: 'n8n', file: '237', img: '/static/images/n8n.png' },
+            // { name: 'grafana', file: '236', img: '/static/images/grafana.jpeg' },
+            { name: 'Debian 11', file: '185', img: '/static/images/Debian.PNG', type:'os' },
+            { name: 'Focal', file: '166', img: '/static/images/focal.jpeg', type:'os' },
+            ],
+            template: [
+                { name: 'MySQL', file: '210', img: '/static/images/maria.jpeg',type:'database' },
+                { name: 'jammy server', file: '169', img: '/static/images/Ubuntu2204LTS1.png',type:'os' },
+                { name: 'ubuntu 24.04', file: '166', img: '/static/images/ubuntu.png',type:'os' },
+                { name: 'GitLab', file: '206', img: '/static/images/GitLab_icon.svg.png', type:'transfer'},
+                { name: 'Postgres-SQL', file: '212', img: '/static/images/post.jpeg', type:'database' },
+                { name: 'Mongodb', file: '210', img: '/static/images/download.jpeg', type:'database'},
+                // { name: 'Sqlite3', file: '186', img: '/static/images/sqlite.jpeg' },
+                { name: 'Debian 11', file: '185', img: '/static/images/Debian.PNG',type:'os' },
+                { name: 'Focal', file: '172', img: '/static/images/focal.jpeg',type:'os' },
+                // { name: 'prometheus', file: '238', img: '/static/images/prometheus1.jpeg' },
+                // { name: 'n8n', file: '237', img: '/static/images/n8n.png' },
+                // { name: 'postgras', file: '212', img: '/static/images/grafana.jpeg' }
+                            ],
+            lxc: [
+                { name: 'Postgres-SQL', file: 'Postgres.sh', img: '/static/images/post.jpeg', type:'database' },
+                { name: 'MYSQL', file: 'mysql.sh', img: '/static/images/development+logo+mysql+icon-1320184807686758112.png', type:'database' },
+                { name: 'Mongodb', file: 'mongo.sh', img: '/static/images/download.jpeg',type:'database'},
+                { name: 'MariaDB', file: 'mariadb.sh', img: '/static/images/maria.jpeg', type:'database' },
+                { name: 'Redis', file: 'redis.sh', img: '/static/images/redis.png', type:'database' },
+                { name: 'Sqlite3', file: 'sqlite.sh', img: '/static/images/sqlite.jpeg', type:'database' },
+                { name: 'Neo4j', file: '107', img: '/static/images/noej.png', type:'database' },
+                { name: 'cassandra', file: '164', img: '/static/images/cassandra.png', type:'database'},
+                // { name: 'Typesense', file: '228', img:'/static/images/typesense.png', type:'database'},
+                { name: 'CouchDB', file: '223', img: '/static/images/CouchDB.png', type:'database' },
+                // { name: 'grist', file: '227', img: '/static/images/grist.png',type:'database'},
+                { name: 'Influxdb', file: '225', img:'/static/images/influxdb.png',type:'database'},
+                { name: 'Wordpress', file: '222', img: '/static/images/wordpress.png', type:'webserver'},
+                { name: 'Metube', file: '229', img: '/static/images/metube.png', type:'media' },
+                { name: 'NGX  proxymanager', file: '243', img:'/static/images/nginxproxymanager.png', type:'webserver'},
+                { name: 'wireguard', file: '242', img: '/static/images/wireguard.png', type:'authentication' },
+                { name: 'motioneye', file: '241', img: '/static/images/motioneye.png',type:'transfer'},
+                { name: 'rabbitmq', file: '240', img:'/static/images/rabbitmq.png'},
+                { name: 'prometheus-AlertManager', file: '239', img: '/static/images/prometheus.png', type:'monitoring' },
+                { name: 'prometheus', file: '238', img: '/static/images/prometheus1.jpeg',type:'monitoring' },
+                { name: 'n8n', file: '237', img: '/static/images/n8n.png' },
+                { name: 'grafana', file: '236', img: '/static/images/grafana.jpeg', type:'monitoring' },
+                { name: 'ubuntu', file: '166', img: '/static/images/ubuntu.png',type:'os' },
+                { name: 'pi-hole', file: '166', img: '/static/images/pihole.png',type:'dns' },
+            ]
+        };
+
+        // Show the category content
+        function showCategory(category) {
+            currentCategory = category;
+            activeFilter = ''; // Reset filter when changing category
+            updateMenu();
+            updateContent();
+        }
+
+        // Show filter-specific content
+        function showCategoryFilter(filter) {
+            activeFilter = filter;
+            updateMenu();
+            updateContent();
+        }
+
+        // Update the active category in the menu
+        function updateMenu() {
+            const links = document.querySelectorAll('nav a');
+            links.forEach(link => {
+                link.classList.remove('active');
+                if (link.innerText.toLowerCase() === currentCategory) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Main content update function
+        function updateContent() {
+            const content = document.getElementById('content');
+            content.innerHTML = '';  // Clear previous content
+
+            let filteredData = data[currentCategory];
+
+            // Apply subcategory filter
+            if (activeFilter) {
+                filteredData = filteredData.filter(item => item.type === activeFilter);
+            }
+
+            // Render the filtered or full data into the content area
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                card.classList.add('icon-card');
+                card.onclick = () => uploadFileToProxmox(item.file);
+
+                const img = document.createElement('img');
+                img.src = item.img;
+                img.alt = item.name;
+
+                const p = document.createElement('p');
+                p.textContent = item.name;
+
+                card.appendChild(img);
+                card.appendChild(p);
+
+                content.appendChild(card);
+            });
+        }
+
+        function uploadFileToProxmox(file) {
+            if (currentCategory === 'lxc') {
+            window.location.href = `/create_lxc?file_name=${file}`;
+            } else if (file.endsWith('.iso') || file.endsWith('.img')) {
+            fetch('/upload_file', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ file: file })
+            })
+            .then(response => response.json())
+            .then(data => {
+            if (data.status === 'success') {
+            alert(data.message);
+            } else {
+            alert('Uploading file: ' + data.message);
+            }
+            })
+            .catch(error => {
+            console.error('Error:', error);
+            alert('An issue occurred during the file upload.');
+            });
+            } else {
+            window.location.href = `/create_vm?file_name=${file}`;
+            }
+            }
+
+
+        updateContent(); // Initialize content
+    </script>
+</body>
+</html>
